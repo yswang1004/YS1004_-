@@ -43,34 +43,40 @@ export default function CompoundDetail() {
     }
   }, [params.index, navigate]);
 
-  if (!result) return null;
+  const compoundMaybe = result?.compound ?? null;
+  const compoundName = compoundMaybe?.name ?? "";
+  const compoundCid = compoundMaybe?.cid ?? null;
 
-  const { compound, bbb, cyp2e1 } = result;
-
+  // NOTE: Hooks must always be called unconditionally.
+  // We keep queries here and control execution with `enabled`.
   const pubchemQuery = trpc.literature.pubchemDescription.useQuery(
-    { cid: compound.cid ?? 0, name: compound.name },
-    { enabled: Boolean(compound.cid) }
+    { cid: compoundCid ?? 0, name: compoundName },
+    { enabled: Boolean(compoundCid) }
   );
 
   const pubmedQuery = trpc.literature.pubmedRecent.useQuery(
-    { term: compound.name, years: 5, limit: 20 },
-    { enabled: true }
+    { term: compoundName || " ", years: 5, limit: 20 },
+    { enabled: Boolean(compoundName) }
   );
 
   const rxnormQuery = trpc.literature.rxnormProducts.useQuery(
-    { name: compound.name, limit: 15 },
-    { enabled: true }
+    { name: compoundName || " ", limit: 15 },
+    { enabled: Boolean(compoundName) }
   );
 
   const ctQuery = trpc.literature.clinicalTrials.useQuery(
-    { term: compound.name, limit: 10 },
-    { enabled: true }
+    { term: compoundName || " ", limit: 10 },
+    { enabled: Boolean(compoundName) }
   );
 
   const sdfQuery = trpc.literature.pubchem3dSdf.useQuery(
-    { cid: compound.cid ?? 0 },
-    { enabled: Boolean(compound.cid) }
+    { cid: compoundCid ?? 0 },
+    { enabled: Boolean(compoundCid) }
   );
+
+  if (!result) return null;
+
+  const { compound, bbb, cyp2e1 } = result;
 
   const viewerRef = useRef<HTMLDivElement | null>(null);
   const [show3d, setShow3d] = useState(false);
