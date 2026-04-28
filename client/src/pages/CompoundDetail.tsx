@@ -74,10 +74,6 @@ export default function CompoundDetail() {
     { enabled: Boolean(compoundCid) }
   );
 
-  if (!result) return null;
-
-  const { compound, bbb, cyp2e1 } = result;
-
   const viewerRef = useRef<HTMLDivElement | null>(null);
   const [show3d, setShow3d] = useState(false);
 
@@ -118,6 +114,19 @@ export default function CompoundDetail() {
       }
     };
   }, [show3d, has3d, sdfQuery.data?.sdf]);
+
+  if (!result) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Navbar />
+        <div className="container py-8 flex-1 max-w-5xl">
+          <p className="text-sm text-muted-foreground">Loading…</p>
+        </div>
+      </div>
+    );
+  }
+
+  const { compound, bbb, cyp2e1 } = result;
 
   const copySmiles = () => {
     if (compound.smiles) {
